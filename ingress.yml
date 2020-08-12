@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: stats
+spec:
+  rules:
+    - host: stats.aust.nyc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: stats-aust-service
+              servicePort: 80
+    - host: ws.aust.nyc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: stats-aust-865dw
+              servicePort: 3000
