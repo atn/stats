@@ -1,16 +1,17 @@
 require('dotenv').config()
 import express from 'express'
-import monk from 'monk'
 import cors from 'cors'
 
 import Mesa, { Message } from '@cryb/mesa'
 import { authenticated } from './mw' 
 
-const db = monk(process.env.MONGO_URI as string)
-const stats = db.get('stats')
+import redis, { getOptions } from './redis'
 
 const app = express()
-const mesa = new Mesa({ port: 3000 })
+const mesa = new Mesa({
+  port: 3000,
+  redis: getOptions()
+})
 
 app.use(cors())
 
@@ -27,19 +28,34 @@ mesa.on('connection', client => {
   })
 })
 
+async function fetchCount(key: string) {
+  let data = await redis.hget('counts', key) as any
+  if(data)
+    data = parseInt(data)
+
+  if(!data)
+    data = 0
+
+  return data
+}
+
+async function incrCount(key: string) {
+  let data = redis.hincrby('counts', key, 1)
+
+  return data
+}
+
 app.get('/', async (req, res) => {
-  const data = await stats.findOne({ id: 1 })
-  res.json({
-    commands: data.commands
-  })
+  const commands = await fetchCount('commands')
+
+  res.json({ commands })
 })
 
 app.post('/new/command', authenticated, async (req, res) => {
   try {
-    const data = await stats.findOne({ id: 1 })
-    const cmds = ++data.commands
-    mesa.send(new Message(0, { commands: cmds }))
-    stats.findOneAndUpdate({ id: 1 }, { $set: { commands: cmds }})
+    const commands = await redis.hincrby('counts', 'commands', 1)
+    mesa.send(new Message(0, { commands }, 'STATS_UPDATE'))
+
     res.sendStatus(200)
   } catch (err) {
     res.send(err).status(400)
