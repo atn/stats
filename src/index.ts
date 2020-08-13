@@ -11,7 +11,7 @@ const stats = db.get('stats')
 import { authenticated } from './mw' 
 
 const app = express()
-const mesa = new Mesa({ port: 3000 })
+const mesa = new Mesa({ port: 3000, heartbeat: { enabled: true } })
 
 app.use(cors())
 

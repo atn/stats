@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600" # 1 hour
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600" # 1 hour
   name: stats
 spec:
   rules:
@@ -18,5 +20,19 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: stats-aust-865dw
+              serviceName: stats-aust-xsllh
               servicePort: 3000
+    - host: api.talked.app
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: tlk-api-service
+              servicePort: 80
+    - host: ws.talked.app
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: tlk-api-h6rr7
+              servicePort: 4000
