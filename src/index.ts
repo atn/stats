@@ -1,17 +1,16 @@
 require('dotenv').config()
-
 import express from 'express'
 import monk from 'monk'
 import cors from 'cors'
+
 import Mesa, { Message } from '@cryb/mesa'
+import { authenticated } from './mw' 
 
 const db = monk(process.env.MONGO_URI as string)
 const stats = db.get('stats')
 
-import { authenticated } from './mw' 
-
 const app = express()
-const mesa = new Mesa({ port: 3000, heartbeat: { enabled: true } })
+const mesa = new Mesa({ port: 3000 })
 
 app.use(cors())
 
